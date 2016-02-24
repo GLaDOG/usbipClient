@@ -1,6 +1,17 @@
-#include "common.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <asm/types.h>
+//该头文件需要放在netlink.h前面防止编译出现__kernel_sa_family未定义
+#include <sys/socket.h>
+#include <linux/netlink.h>
+#include <pthread.h>
 
-int init_hotplug_sock(void)
+#define UEVENT_BUFFER_SIZE 2048
+
+static int init_hotplug_sock(void)
 {
     struct sockaddr_nl snl;
     int retval;
@@ -31,17 +42,32 @@ int init_hotplug_sock(void)
     return hotplug_sock;
 }
 
+pthread_t ntid;
+
 int main(int argc, char *argv[])
 {
+    int flag = 0;
+    int err;
     int hotplug_sock = init_hotplug_sock();
     char buf[UEVENT_BUFFER_SIZE * 2] = {0};
-    int err;
+    char bufLTime[UEVENT_BUFFER_SIZE * 2] = {0};
+    memset(bufLTime, '\0', UEVENT_BUFFER_SIZE * 2);
 
     while (1) {
-        memset(buf, 0, UEVENT_BUFFER_SIZE * 2);
+        memset(buf, '\0', UEVENT_BUFFER_SIZE * 2);
         recv(hotplug_sock, &buf, sizeof(buf), 0);
-        err = pthread_create(&ntid, NULL, getBusid, buf);
-        sleep(1);
+        if (flag == 0) {
+            strcpy(bufLTime, buf);
+//            err=pthread_create(&ntil, NULL, getBusid, buf);
+            printf("%s\n", buf);
+            ++flag;
+        } else {
+            if ((strlen(buf) > 40) && !((strlen(buf) > 40) && !(strncmp(buf, bufLTime, 45)))) {
+//                err=pthread_create(&ntil, NULL, getBusid, buf);
+                printf("%s\n", buf);
+            }
+            strcpy(bufLTime, buf);
+        }
     }
 
     return 0;
