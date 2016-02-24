@@ -1,4 +1,4 @@
-#include "hotplug.h"
+#include "common.h"
 
 int init_hotplug_sock(void)
 {
@@ -29,4 +29,20 @@ int init_hotplug_sock(void)
     }
 
     return hotplug_sock;
+}
+
+int main(int argc, char *argv[])
+{
+    int hotplug_sock = init_hotplug_sock();
+    char buf[UEVENT_BUFFER_SIZE * 2] = {0};
+    int err;
+
+    while (1) {
+        memset(buf, 0, UEVENT_BUFFER_SIZE * 2);
+        recv(hotplug_sock, &buf, sizeof(buf), 0);
+        err = pthread_create(&ntid, NULL, getBusid, buf);
+        sleep(1);
+    }
+
+    return 0;
 }
