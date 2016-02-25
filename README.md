@@ -1,12 +1,30 @@
 # usbipClient
-global flag=0
 
-while(1) {
-    revc(buf);
-    ++flag;
-    if 0 == flag:
-        create thread(0);
-    else:
-        continue
-}
-keep thread0 sleep a while
+* * *
+
+## 目前为止遇到的问题及解决办法
+
+* * *
+### 1.热插拔处理(hotplug)
+
+要求：需要系统自动识别USB信息的插入和拔出
+使用netlink和udev配合来完成。
+USB设备发生变化时，首先由kernel发现，然后使用netlink通知udev。
+这里需要做的工作是：在用户层创建netlink套接字，用于接收kernel发送的USB设备信息。
+详细可以参考[这里](add@/devices/pci0000:00/0000:00:1d.0/usb5/5-1)。
+
+* * *
+### 2.对于从kernel接收的USB信息进行处理提取信息
+
+* * *
+### 3.创建线程处理USB信息时，出现线程竞争
+
+1，强迫主线程休眠，子线程先运行
+2，使用临时变量接收buf内容，不干扰线程运行顺序。
+
+* * *
+### 4.未完成工作
+
+* 1.将处理结果发送到server。
+* 3.从usbiputils抽取代码。
+* 2.优化代码，使其更加健壮。

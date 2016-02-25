@@ -1,17 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <asm/types.h>
-//该头文件需要放在netlink.h前面防止编译出现__kernel_sa_family未定义
-#include <sys/socket.h>
-#include <linux/netlink.h>
-#include <pthread.h>
+#include "common.h"
 
-#define UEVENT_BUFFER_SIZE 2048
-
-static int init_hotplug_sock(void)
+int init_hotplug_sock(void)
 {
     struct sockaddr_nl snl;
     int retval;
@@ -42,8 +31,6 @@ static int init_hotplug_sock(void)
     return hotplug_sock;
 }
 
-pthread_t ntid;
-
 int main(int argc, char *argv[])
 {
     int flag = 0;
@@ -55,20 +42,27 @@ int main(int argc, char *argv[])
 
     while (1) {
         memset(buf, '\0', UEVENT_BUFFER_SIZE * 2);
-        recv(hotplug_sock, &buf, sizeof(buf), 0);
+        recv(hotplug_sock, buf, sizeof(buf), 0);
         if (flag == 0) {
-            strcpy(bufLTime, buf);
-//            err=pthread_create(&ntil, NULL, getBusid, buf);
-            printf("%s\n", buf);
+            strncpy(bufLTime, buf, 1024);
+            printf("main thread buf:%s\n", buf);
+            char data[4096]={'\0'};
+            strcpy (data, buf);
+            err=pthread_create(&ntid, NULL, getBusid, (void *)data);
             ++flag;
         } else {
-            if ((strlen(buf) > 40) && !((strlen(buf) > 40) && !(strncmp(buf, bufLTime, 45)))) {
-//                err=pthread_create(&ntil, NULL, getBusid, buf);
-                printf("%s\n", buf);
+            if ((strlen(buf) > 40) && !(strncmp(buf, bufLTime, 45))) {
+                /* do nothing */
+            } else if (strlen(buf) < 40) {
+                strcpy(buf, bufLTime);
+            } else {
+                printf("main thread buf:%s\n", buf);
+                char data[4096]={'\0'};
+                strcpy (data, buf);
+                err=pthread_create(&ntid, NULL, getBusid, (void *)data);
             }
             strcpy(bufLTime, buf);
         }
     }
-
     return 0;
 }
