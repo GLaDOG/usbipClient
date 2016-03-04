@@ -14,6 +14,8 @@
 #include <asm/types.h>
 #include <linux/netlink.h>
 #include <pthread.h>
+#include <strings.h>
+#include <arpa/inet.h>
 
 #define MAXLINE 1024
 #define IPADDRESS "192.168.6.164"
