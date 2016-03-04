@@ -57,16 +57,16 @@ busidMsg *getBusid(char *buf)
         }
         busid->action = 1;
         runCommand(busid);
-        printf("action:%s,busid:%s\n", "add", busid->ubusid);
+        printf("In getbusid:action:%s,busid:%s\n", "add", busid->ubusid);
     }
 
     if (!strncmp(buffer, "rem", 3) && strlen(buffer) >= 48) {
         for(i = 0 ; i < 3; i++) {
             *(busid->ubusid + i) = *(buffer + i + 45);
         }
-        busid->action = 1;
+        busid->action = 2;
         runCommand(busid);
-        printf("action:%s,busid:%s\n", "remove", busid->ubusid);
+        printf("In getBusid:action:%s,busid:%s\n", "remove", busid->ubusid);
     }
 
     return busid;
@@ -88,12 +88,12 @@ void * handleHotplug(void *hotplugSock)
 
     while (1) {
         memset(buf, '\0', UEVENT_BUFFER_SIZE);
-        recv((int)hotplugSock, buf, UEVENT_BUFFER_SIZE, 0);
+        err = recv((int)hotplugSock, buf, UEVENT_BUFFER_SIZE, 0);
         if (flag == 0) {
             strncpy(bufLTime, buf, 1024);
             printf("main thread buf:%s\n", buf);
             busid = getBusid(buf);
-            len = write(servfd, busid, sizeof(busidMsg));
+            len = send(servfd, busid, sizeof(busidMsg), 0);
             if (len != sizeof(busidMsg)) {
                 fprintf(stderr, "error write, %s", strerror(errno));
             }
@@ -106,8 +106,8 @@ void * handleHotplug(void *hotplugSock)
             } else {
                 printf("main thread buf:%s\n", buf);
                 busid = getBusid(buf);
-                len = write(servfd, busid, sizeof(busidMsg));
-                if (len) {
+                len = send(servfd, busid, sizeof(busidMsg), 0);
+                if (len != sizeof(busidMsg)) {
                     fprintf(stderr, "error write, %s", strerror(errno));
                 }
             }

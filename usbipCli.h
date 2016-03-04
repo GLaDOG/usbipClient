@@ -16,7 +16,7 @@
 #include <pthread.h>
 
 #define MAXLINE 1024
-#define IPADDRESS "127.0.0.1"
+#define IPADDRESS "192.168.6.164"
 #define SERV_PORT 25341
 #define UEVENT_BUFFER_SIZE 2048
 
@@ -31,6 +31,8 @@ char *cmd;
 void initCommand();
 busidMsg *initbusid();
 int runCommand(busidMsg *busid);
+int bind_device(char *busid);
+int unbind_device(char *busid);
 void initServerConn(void);
 void * handleServMsg(void *servfd);
 int initHotplugSock(void);

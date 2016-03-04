@@ -26,7 +26,8 @@ void *handleServMsg(void *servfd)
     busid = initbusid();
 
     while (1) {
-        ret = read((int)servfd, busid, sizeof(busidMsg));
+        ret = recv((int)servfd, busid, sizeof(busidMsg), 0);
+        printf("In handleServ:action, %d busid, %s\n", busid->action, busid->ubusid);
         if (ret != sizeof(busidMsg)) {
             fprintf(stderr, "error read, %s", strerror(errno));
         }

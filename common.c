@@ -22,11 +22,14 @@ busidMsg * initbusid()
 
 int runCommand(busidMsg *busid)
 {
+    int ret = -1;
     if (busid->action == 1) {
-        sprintf(cmd, "%s %s", "usbip bind --busid=", busid->ubusid);
-        system(cmd);
+        ret = bind_device(busid->ubusid);
+        sprintf(cmd, "%s%s", "usbip bind --busid=", busid->ubusid);
     } else if (busid->action == 2) {
-        sprintf(cmd, "%s %s", "usbip unbind --busid=", busid->ubusid);
-        system(cmd);
+        ret = unbind_device(busid->ubusid);
+        sprintf(cmd, "%s%s", "usbip unbind --busid=", busid->ubusid);
     }
+    printf("In runCommand:%s\n", cmd);
+    return 1;
 }
