@@ -1,2 +1,2 @@
 all:
-	cc -o uc *.c -lsysfs -lpthread
+	cc -o uc *.c -lsysfs

@@ -35,3 +35,7 @@ USB设备发生变化时，首先由kernel发现，然后使用netlink通知udev
     * 2.1 线程管理问题，像线程优先级，线程同步(对关键数据进行加锁保护).
     * 2.2 对使用的内存资源的free，防止内存泄漏.
     * 2.3 对usbip-utils进行关键代码的抽取，避免调用system()，包括usbip-bind()和usbip-unbind().
+
+### 6.3月16日更新
+* 1.重新对C/S结构进行了处理，优化之前软件结构的冗余，减少了C/S之间不必要的信息交流。现在C只对S发送bind到usb-host的设备号，不接收S的消息。而S只是处理C发送的设备号，不给C发送移除的设备号，只是在S端清理attach后产生的文件，方便设备的下次接入挂载。
+* 2.因为涉及使用usbip的userspace-utils，例如bind(), unbind(), attach(), detach()等操作，但是使用system()的话，又会因为执行system()时产生的SIGINT导致程序执行时的不稳定，所以就把usbip的userspace-utils编译成动态库做出API，在程序中作为接口函数调用，但是同时也对接口函数进行了改造，使之更加适应程序的功能需要。
